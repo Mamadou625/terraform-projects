@@ -38,7 +38,7 @@ resource "aws_route_table" "project-01_route_table" {
     gateway_id = aws_internet_gateway.project-01_igw.id
   }
   tags = {
-    Name        = "dev-route-table"
+    Name        = "dev-public-route-table"
     Environment = "dev"
   }
 }
