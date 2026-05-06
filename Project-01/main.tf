@@ -47,3 +47,28 @@ resource "aws_route_table_association" "project-01_route_table_assoc" {
   subnet_id      = aws_subnet.project-01_subnet.id
   route_table_id = aws_route_table.project-01_route_table.id
 }
+
+# Creation of a security group for the EC2 instance
+resource "aws_security_group" "project-01_security_group" {
+  name        = "dev-security-group"
+  description = "Security group for dev instances"
+  vpc_id      = aws_vpc.project-01_vpc.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Environment = "dev"
+  }
+}
