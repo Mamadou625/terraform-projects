@@ -42,3 +42,8 @@ resource "aws_route_table" "project-01_route_table" {
     Environment = "dev"
   }
 }
+
+resource "aws_route_table_association" "project-01_route_table_assoc" {
+  subnet_id      = aws_subnet.project-01_subnet.id
+  route_table_id = aws_route_table.project-01_route_table.id
+}
