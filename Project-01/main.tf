@@ -72,3 +72,10 @@ resource "aws_security_group" "project-01_security_group" {
     Environment = "dev"
   }
 }
+
+# Creation of a key pair for the EC2 instance
+
+resource "aws_key_pair" "project-01_key_pair" {
+  key_name   = "Project-01-Key-Pair"
+  public_key = file("~/.ssh/id_ed25519.pub")
+} 
