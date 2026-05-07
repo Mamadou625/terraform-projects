@@ -9,7 +9,7 @@ VPC (10.10.0.0/16)
 └── Public Subnet (10.10.1.0/24) — ca-central-1a
     ├── Internet Gateway
     ├── Route Table (0.0.0.0/0 → IGW)
-    └── EC2 Instance (t2.micro, Amazon Linux 2023)
+    └── EC2 Instance (t2.micro, Ubuntu 24.04 LTS)
         ├── Security Group (SSH :22 inbound)
         └── Key Pair (ed25519)
 ```
@@ -24,14 +24,13 @@ VPC (10.10.0.0/16)
 | `aws_route_table` | dev-public-route-table | Route table with default route to IGW |
 | `aws_security_group` | dev-security-group | Allows SSH (port 22) inbound, all outbound |
 | `aws_key_pair` | Project-01-Key-Pair | Uses `~/.ssh/id_ed25519.pub` |
-| `aws_instance` | dev-ec2-instance | Amazon Linux 2023, t2.micro |
+| `aws_instance` | dev-ec2-instance | Ubuntu 24.04 LTS, t2.micro |
 
 ## EC2 User Data
 
 On first boot the instance automatically installs:
-- **Docker** (via `amazon-linux-extras`)
-- **Docker Compose** (latest release)
-- `ec2-user` is added to the `docker` group for rootless usage
+- **Docker** (via the official Docker `apt` repository)
+- `ubuntu` user is added to the `docker` group for rootless usage
 
 ## Prerequisites
 
@@ -52,7 +51,7 @@ terraform plan
 terraform apply
 
 # Connect to the instance after apply
-ssh -i ~/.ssh/id_ed25519 ec2-user@<public-ip>
+ssh -i ~/.ssh/id_ed25519 ubuntu@<public-ip>
 
 # Tear down all resources
 terraform destroy
@@ -64,7 +63,7 @@ terraform destroy
 |---|---|
 | AWS Region | `ca-central-1` |
 | AWS Provider | `hashicorp/aws ~> 6.0` |
-| AMI | Amazon Linux 2023 (`al2023-ami-2023.11.20260505.0-kernel-6.1-x86_64`) |
+| AMI | Ubuntu 24.04 LTS Noble (`ubuntu-noble-24.04-amd64-server-*`, owner `099720109477`) |
 | VPC CIDR | `10.10.0.0/16` |
 | Subnet CIDR | `10.10.1.0/24` |
 | Instance type | `t2.micro` |

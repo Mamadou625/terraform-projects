@@ -83,7 +83,7 @@ resource "aws_key_pair" "project-01_key_pair" {
 # Creation of an EC2 instance in the public subnet
 
 resource "aws_instance" "project-01_ec2_instance" {
-  ami             = data.aws_ami.amazon_linux_2.id
+  ami             = data.aws_ami.project-01_ami.id
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.project-01_subnet.id
   key_name        = aws_key_pair.project-01_key_pair.id
