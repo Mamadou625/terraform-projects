@@ -1,35 +1,24 @@
 #!/bin/bash
-set -e
+sudo apt-get update -y
+sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release software-properties-common
 
-# Update system packages
-yum update -y
+# Add Docker's official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# Install required dependencies for Amazon Linux 2
-yum install -y ca-certificates curl git
+# Add Docker repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Install Docker using amazon-linux-extras
-amazon-linux-extras install docker -y || {
-  # Fallback for AL2 if amazon-linux-extras fails
-  yum install -y docker
-}
+sudo apt-get update -y
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Start Docker service
-systemctl start docker
-systemctl enable docker
+# Enable and start Docker service
+sudo systemctl enable docker
+sudo systemctl start docker
 
-# Add ec2-user to docker group (allows non-root Docker usage)
-usermod -a -G docker ec2-user
-
-# Install Docker Compose
-curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-
-# Wait for Docker daemon to be ready
-sleep 5
-
-# Verify installations
-echo "Docker version:"
-docker --version
-echo "Docker Compose version:"
-docker-compose --version
-echo "Docker installation completed successfully"
+# Allow ubuntu user to run docker without sudo
+sudo usermod -aG docker ubuntu

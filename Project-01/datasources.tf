@@ -1,9 +1,9 @@
 #creation of my my ami
-data "aws_ami" "amazon_linux_2" {
+data "aws_ami" "project-01_ami" {
   most_recent = true
-  owners      = ["137112412989"]
+  owners      = ["099720109477"]
   filter {
     name   = "name"
-    values = ["al2023-ami-2023.11.20260505.0-kernel-6.1-x86_64"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
 }
