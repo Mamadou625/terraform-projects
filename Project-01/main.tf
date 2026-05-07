@@ -78,4 +78,20 @@ resource "aws_security_group" "project-01_security_group" {
 resource "aws_key_pair" "project-01_key_pair" {
   key_name   = "Project-01-Key-Pair"
   public_key = file("~/.ssh/id_ed25519.pub")
-} 
+}
+
+# Creation of an EC2 instance in the public subnet
+
+resource "aws_instance" "project-01_ec2_instance" {
+  ami             = data.aws_ami.amazon_linux_2.id
+  instance_type   = "t2.micro"
+  subnet_id       = aws_subnet.project-01_subnet.id
+  key_name        = aws_key_pair.project-01_key_pair.id
+  security_groups = [aws_security_group.project-01_security_group.id]
+  user_data      = file("userdata.tpl")
+
+  tags = {
+    Name        = "dev-ec2-instance"
+    Environment = "dev"
+  }
+}
