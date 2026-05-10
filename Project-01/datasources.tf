@@ -1,4 +1,4 @@
-#creation of my my ami
+#creation of my Project-01 ami
 data "aws_ami" "project-01_ami" {
   most_recent = true
   owners      = ["099720109477"]
