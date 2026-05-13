@@ -29,7 +29,7 @@ variable "subnet_id" {
   
 }
 
-variable "ec2_name" {
+variable "instance_name" {
     description = "Name of the EC2 instance"
     type = string
     default = "project-02-ec2"

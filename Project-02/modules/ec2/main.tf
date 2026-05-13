@@ -1,4 +1,4 @@
-# creati   of my security group
+# Creation of my security group
 resource "aws_security_group" "sg" {
     name        = var.sg_name
     description = "Security group for EC2 instance"
@@ -21,12 +21,13 @@ resource "aws_security_group" "sg" {
 
 # Creation of my EC2 instance
 resource "aws_instance" "ec2" {
-    ami           = var.ami_id
-    instance_type = var.instance_type
-    subnet_id     = var.subnet_id
-    security_groups = [aws_security_group.sg.id]
+    ami                         = var.ami_id
+    instance_type               = var.instance_type
+    subnet_id                   = var.subnet_id
+    vpc_security_group_ids      = [aws_security_group.sg.id]
+    associate_public_ip_address = true
 
     tags = {
-      Name = var.ec2_name
+      Name = var.instance_name
     }
 }
