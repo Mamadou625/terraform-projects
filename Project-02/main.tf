@@ -21,3 +21,8 @@ module "ec2" {
   instance_type = "t2.micro"
   instance_name = "project-02-ec2"
 } 
+
+module "s3" {
+  source = "./modules/S3"
+  bucket_name = var.bucket_name
+}
