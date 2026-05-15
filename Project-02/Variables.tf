@@ -30,3 +30,9 @@ variable "ami_id" {
   type = string
   default = "ami-0eacb8127f9b58e90"
 }
+
+variable "bucket_name" {
+  description = "The bucket Name"
+  type = string
+  default = "mamadou-project-02-bucket"
+}
