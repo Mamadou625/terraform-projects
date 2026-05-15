@@ -47,3 +47,13 @@ variable "sg_name" {
   description = "Name of the Security Group"
   type        = string
 }
+
+variable "bucket_name" {
+  description = "My Bucket name"
+  type = string
+}
+
+variable "bucket_region" {
+  description = "The region where the bucket will be created"
+  type = string
+}

@@ -24,3 +24,10 @@ module "ec2" {
   instance_name = var.instance_name
   sg_name       = var.sg_name
 }
+
+
+module "s3_bucket" {
+  source = "../../modules/S3"
+  bucket_name = var.bucket_name
+  bucket_region = var.bucket_region
+}
