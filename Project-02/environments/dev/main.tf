@@ -8,17 +8,18 @@ module "vpc" {
 module "subnet" {
   source = "../../modules/subnet"
 
-  subnet_name       = var.subnet_name
-  subnet_cidr_block = var.subnet_cidr_block
-  availability_zone = var.availability_zone
-  vpc_id            = module.vpc.vpc_id
+  project_name               = var.project_name
+  public_subnet_cidr_blocks  = var.public_subnet_cidr_blocks
+  private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
+  availability_zones         = var.availability_zones
+  vpc_id                     = module.vpc.vpc_id
 }
 
 module "ec2" {
   source = "../../modules/ec2"
 
   vpc_id        = module.vpc.vpc_id
-  subnet_id     = module.subnet.subnet_id
+  subnet_id     = module.subnet.public_subnet_ids[0]
   ami_id        = var.ami_id
   instance_type = var.instance_type
   instance_name = var.instance_name
@@ -27,7 +28,7 @@ module "ec2" {
 
 
 module "s3_bucket" {
-  source = "../../modules/S3"
-  bucket_name = var.bucket_name
+  source        = "../../modules/S3"
+  bucket_name   = var.bucket_name
   bucket_region = var.bucket_region
 }
