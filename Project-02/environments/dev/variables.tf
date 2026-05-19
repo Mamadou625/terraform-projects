@@ -13,19 +13,24 @@ variable "vpc_cidr_block" {
   type        = string
 }
 
-variable "subnet_name" {
-  description = "Name of the Subnet"
+variable "project_name" {
+  description = "Name prefix for all subnet resources"
   type        = string
 }
 
-variable "subnet_cidr_block" {
-  description = "CIDR block for the Subnet"
-  type        = string
+variable "public_subnet_cidr_blocks" {
+  description = "CIDR blocks for the 3 public subnets"
+  type        = list(string)
 }
 
-variable "availability_zone" {
-  description = "Availability zone for the Subnet"
-  type        = string
+variable "private_subnet_cidr_blocks" {
+  description = "CIDR blocks for the 3 private subnets"
+  type        = list(string)
+}
+
+variable "availability_zones" {
+  description = "List of 3 availability zones for the subnets"
+  type        = list(string)
 }
 
 variable "ami_id" {
@@ -50,10 +55,10 @@ variable "sg_name" {
 
 variable "bucket_name" {
   description = "My Bucket name"
-  type = string
+  type        = string
 }
 
 variable "bucket_region" {
   description = "The region where the bucket will be created"
-  type = string
+  type        = string
 }
