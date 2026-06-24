@@ -116,6 +116,9 @@ S3 uploads include the latest bundle.
   **prod** automatically (auto-approve, no manual gate). To require manual approval, add
   `environment: prod` to the `apply-prod` job and configure a `prod` GitHub Environment with
   required reviewers.
+- **`project-03-terraform-destroy.yml`** — manual only (**Actions → Run workflow**): pick the
+  environment and type `destroy` to confirm. It empties the versioned app-code bucket, then
+  runs `terraform destroy`. Run it from the **`main`** branch so the OIDC trust matches.
 
 One-time GitHub repo setup:
 

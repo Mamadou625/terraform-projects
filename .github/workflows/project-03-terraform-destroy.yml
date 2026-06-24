@@ -1,0 +1,75 @@
+name: Project-03 Terraform Destroy
+
+# Manual-only teardown. Run from the Actions tab → "Run workflow".
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to destroy"
+        type: choice
+        options: [prod, dev]
+        default: prod
+      confirm:
+        description: 'Type "destroy" to confirm'
+        type: string
+        required: true
+
+permissions:
+  id-token: write # required for AWS OIDC
+  contents: read
+
+env:
+  AWS_REGION: ca-central-1
+  TF_VERSION: "1.10.5"
+
+jobs:
+  destroy:
+    name: destroy-${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Project-03/environments/${{ inputs.environment }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm != 'destroy' }}
+        run: |
+          echo "Confirmation failed — type 'destroy' exactly to proceed."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Empty app-code S3 bucket (all versions)
+        # The bucket is versioned and has no force_destroy, so empty every version
+        # and delete marker before terraform deletes the bucket.
+        run: |
+          set -e
+          BUCKET=$(terraform output -raw app_code_bucket 2>/dev/null || echo "")
+          if [ -z "$BUCKET" ]; then echo "No bucket in state; skipping."; exit 0; fi
+          echo "Emptying s3://$BUCKET ..."
+          aws s3 rm "s3://$BUCKET" --recursive || true
+          versions=$(aws s3api list-object-versions --bucket "$BUCKET" --output json --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}')
+          if [ "$(echo "$versions" | jq -r '.Objects')" != "null" ]; then
+            aws s3api delete-objects --bucket "$BUCKET" --delete "$versions" || true
+          fi
+          markers=$(aws s3api list-object-versions --bucket "$BUCKET" --output json --query '{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}')
+          if [ "$(echo "$markers" | jq -r '.Objects')" != "null" ]; then
+            aws s3api delete-objects --bucket "$BUCKET" --delete "$markers" || true
+          fi
+
+      - name: Terraform destroy
+        run: terraform destroy -input=false -auto-approve
