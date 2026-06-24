@@ -1,3 +1,7 @@
+
+
+
+
 # Latest Amazon Linux 2023 AMI for the web and app tiers
 data "aws_ami" "al2023" {
   most_recent = true
@@ -36,7 +40,8 @@ module "security_groups" {
 module "s3" {
   source = "../../modules/s3"
 
-  bucket_name = var.app_bucket_name
+  bucket_name  = var.app_bucket_name
+  app_code_dir = "${path.module}/../../application-code"
 }
 
 module "database" {
@@ -63,6 +68,9 @@ module "iam" {
 module "app_tier" {
   source = "../../modules/app_tier"
 
+  # Ensure the app code is uploaded to S3 before instances launch and run user-data
+  depends_on = [module.s3]
+
   project_name          = var.project_name
   vpc_id                = module.vpc.vpc_id
   app_subnet_ids        = module.vpc.app_subnet_ids
@@ -84,6 +92,9 @@ module "app_tier" {
 
 module "web_tier" {
   source = "../../modules/web_tier"
+
+  # Ensure the React build is uploaded to S3 before instances launch and run user-data
+  depends_on = [module.s3]
 
   project_name          = var.project_name
   vpc_id                = module.vpc.vpc_id

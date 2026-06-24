@@ -79,62 +79,43 @@ terraform output ci_role_arn   # note this for GitHub
 This creates the remote state S3 bucket, the GitHub Actions OIDC provider and the CI IAM
 role.
 
-### 2. Upload application code to S3
+### 2. Build the React frontend, then apply
 
-The instances pull their code from the app-code bucket on boot. Build the React app and
-upload both tiers (source for the workshop app lives in
-`../Project-02/aws-three-tier-web-architecture-workshop/application-code`):
-
-```bash
-# web tier (build first)
-cd <web-tier-source>
-npm install && npm run build
-aws s3 cp ./build  s3://<app_bucket_name>/web-tier/build --recursive
-
-# app tier (source + package.json)
-aws s3 cp <app-tier-source> s3://<app_bucket_name>/app-tier --recursive
-```
-
-> The bucket is created by the `s3` module during `terraform apply`, so on the very first
-> apply the instances may come up before code is uploaded — upload, then let the ASG
-> recycle instances (or terminate them) to re-run user-data.
-
-### 3. Apply an environment
+The application code is uploaded to S3 **by Terraform** (`aws_s3_object` in the `s3`
+module), and the ASGs depend on those objects, so instances find the code on first boot —
+no manual upload or instance recycling. The app-tier source is committed; the **web build
+must exist on disk before apply** (CI runs this automatically):
 
 ```bash
-cd environments/dev
-terraform init      # configures the S3 backend
+cd application-code/web-tier
+npm install && npm run build   # produces web-tier/build/ that Terraform uploads
+
+cd ../../environments/dev
+terraform init                 # configures the S3 backend
 terraform apply
 terraform output web_alb_dns
 ```
 
-Repeat for `environments/prod` (or let CI handle it).
+Repeat for `environments/prod` (or let CI handle it — see below).
 
-### 4. Seed the database (one-time, post-apply)
+### 3. Database schema
 
-Like the AWS workshop, connect to an **app tier** instance via SSM Session Manager and
-create the schema/table the Node app expects (credentials are in Secrets Manager and were
-written to `DbConfig.js` by user-data):
-
-```sql
-CREATE DATABASE IF NOT EXISTS webappdb;
-USE webappdb;
-CREATE TABLE IF NOT EXISTS transactions (
-  id INT NOT NULL AUTO_INCREMENT,
-  amount DECIMAL(10,2),
-  description VARCHAR(100),
-  PRIMARY KEY (id)
-);
-```
+No manual seeding needed: the **app-tier user-data** runs an idempotent
+`CREATE DATABASE/TABLE IF NOT EXISTS` against Aurora on boot (it reads the managed
+credentials from Secrets Manager). The `transactions` table the Node app expects is created
+automatically.
 
 ## CI/CD (GitHub Actions)
 
+Both workflows build the React frontend (`npm run build`) before running Terraform, so the
+S3 uploads include the latest bundle.
+
 - **`project-03-terraform-plan.yml`** — on PRs touching `Project-03/**`: `fmt`/`init`/
-  `validate`/`plan` for dev **and** prod, and posts the plan as a PR comment. Review gate.
-- **`project-03-terraform-apply.yml`** — on merge to `main`: applies **dev** automatically,
-  then **prod** automatically (auto-approve, no manual gate). To require manual approval for
-  prod, add `environment: prod` to the `apply-prod` job and configure a `prod` GitHub
-  Environment with required reviewers.
+  `validate`/`plan` for **prod**, and posts the plan as a PR comment. Review gate.
+- **`project-03-terraform-apply.yml`** — on merge to `main`: builds the frontend and applies
+  **prod** automatically (auto-approve, no manual gate). To require manual approval, add
+  `environment: prod` to the `apply-prod` job and configure a `prod` GitHub Environment with
+  required reviewers.
 
 One-time GitHub repo setup:
 

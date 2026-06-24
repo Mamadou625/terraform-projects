@@ -32,6 +32,12 @@ module.exports = Object.freeze({
 });
 EOF
 
+# Seed the schema the app expects (idempotent; app instances can reach Aurora).
+# Best-effort: a transient DB hiccup must not fail the instance health check.
+dnf install -y mariadb105 || true
+mysql -h "${db_endpoint}" -u "$DB_USER" -p"$DB_PWD" -e \
+  "CREATE DATABASE IF NOT EXISTS ${db_name}; USE ${db_name}; CREATE TABLE IF NOT EXISTS transactions (id INT NOT NULL AUTO_INCREMENT, amount DECIMAL(10,2), description VARCHAR(100), PRIMARY KEY (id));" || true
+
 # Start the Node app (listens on port 4000) and persist across reboots
 pm2 start index.js --name app-tier
 pm2 save

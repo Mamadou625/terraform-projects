@@ -45,6 +45,19 @@ jobs:
         run: terraform fmt -check -recursive
         working-directory: Project-03
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build React frontend
+        working-directory: Project-03/application-code/web-tier
+        env:
+          CI: "false"
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
       - name: Terraform init
         run: terraform init -input=false
 
