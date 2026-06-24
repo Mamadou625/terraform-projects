@@ -3,6 +3,8 @@
 A highly available three-tier web application on AWS, built end-to-end with Terraform and
 deployed through a GitHub Actions CI/CD pipeline.
 
+![AWS three-tier web architecture](assets/architecture.png)
+
 ```
 Internet
    │
