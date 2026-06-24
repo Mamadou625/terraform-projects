@@ -1,0 +1,23 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Local / secret variable files (keep checked-in terraform.tfvars only)
+*.auto.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Plan output
+tfplan
+*.tfplan
+
+# Node / React build artifacts (web-tier is built and uploaded to S3, not committed)
+node_modules/
+application-code/web-tier/build/
