@@ -21,3 +21,10 @@ tfplan
 # Node / React build artifacts (web-tier is built and uploaded to S3, not committed)
 node_modules/
 application-code/web-tier/build/
+
+# The root .gitignore excludes *.tfvars. These env/bootstrap tfvars hold NO secrets
+# (the DB password is generated into Secrets Manager) and are required by CI to run
+# terraform, so re-include them deliberately.
+!environments/dev/terraform.tfvars
+!environments/prod/terraform.tfvars
+!bootstrap/terraform.tfvars

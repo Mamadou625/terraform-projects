@@ -7,9 +7,6 @@ module "vpc" {
 
 module "subnet" {
   source = "./modules/subnet"
-
-  subnet_name       = var.subnet_name
-  subnet_cidr_block = var.subnet_cidr_block
   vpc_id            = module.vpc.vpc_id
 }
 
@@ -24,5 +21,6 @@ module "ec2" {
 
 module "s3" {
   source = "./modules/S3"
+  
   bucket_name = var.bucket_name
 }

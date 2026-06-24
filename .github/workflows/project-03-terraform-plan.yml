@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [dev, prod]
+        environment: [prod]
     defaults:
       run:
         working-directory: Project-03/environments/${{ matrix.environment }}
